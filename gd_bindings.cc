@@ -17,22 +17,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <v8.h>
 #include <node.h>
 
-/*
-nodejs before v0.5.2 has node_events.h. v0.5.2 and above doesn't have
-JUST WORK FIX by Dudochkin Victor <blacksmith@gogoo.ru>
-*/
-
-#include <node_version.h>
-
-#if ((NODE_MINOR_VERSION <= 5) && (NODE_PATCH_VERSION < 2))
-#define HAVE_NODE_EVENTS    
-#endif
-
-#ifdef HAVE_NODE_EVENTS
-#include <node_events.h>
-#else
 #include <node_object_wrap.h>
-#endif
 
 #include <string.h>
 #include <assert.h>
@@ -257,12 +242,8 @@ protected:
 
 		return scope.Close(result);
 	}
-	
-#ifdef HAVE_NODE_EVENTS
-	class Image : public EventEmitter
-#else
+
 	class Image : public ObjectWrap
-#endif	
 	{
 	public:
 		static Persistent<FunctionTemplate> constructor_template;
@@ -272,9 +253,7 @@ protected:
 
 			Local<FunctionTemplate> t = FunctionTemplate::New(New);
 			constructor_template = Persistent<FunctionTemplate>::New(t);
-#ifdef HAVE_NODE_EVENTS
-			t->Inherit(EventEmitter::constructor_template);
-#endif
+
 			t->InstanceTemplate()->SetInternalFieldCount(1);			
 
 			NODE_SET_PROTOTYPE_METHOD(t, "jpeg", Jpeg);
